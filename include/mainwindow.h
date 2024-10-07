@@ -17,6 +17,8 @@
 #include <QString>
 
 const QString DATA_FILE_PATH = "transactions.csv";
+const QByteArray AES_KEY = "12345678901234567890123456789012";  // 32 байта (AES-256)
+const QByteArray IV = "1234567890123456";  // 16 байт для CBC
 
 // Объявление пространства имен для пользовательского интерфейса
 namespace Ui {
