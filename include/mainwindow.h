@@ -18,11 +18,10 @@
 
 const QString DATA_FILE_PATH = "transactions.csv";
 
+// Объявление пространства имен для пользовательского интерфейса
 namespace Ui {
 class MainWindow;
 }
-
-enum State { Unauthorized };
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -32,22 +31,37 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
 
  private:
+  // Метод для получения хеша транзакции
   int getHash(QByteArray &hash);
 
+  // Метод для добавления новой транзакции
   void addTransaction(const QString &value, const QString &walletId,
                       const QString &date);
+
+  // Метод для проверки валидности транзакции
   bool isValidTransaction(const QString &value, const QString &walletId,
                           const QString &date);
+
+  // Метод для сохранения транзакций в файл
   void saveToFile();
+
+  // Метод для отображения списка транзакций
   void displayTransactions();
 
+  // Указатель на пользовательский интерфейс
   Ui::MainWindow *ui;
+
+  // Вектор для хранения транзакций
   QVector<Transaction> transactions;
-  State state;
+
+  // Флаг, указывающий, было ли это первое открытие файла
   bool firstOpen = true;
 
  private slots:
+  // Слот, обрабатывающий нажатие на кнопку "Добавить"
   void onAddButtonClicked();
+
+  // Метод для загрузки данных из файла
   void loadFile();
 };
 
