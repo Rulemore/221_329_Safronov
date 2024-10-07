@@ -14,7 +14,6 @@ MainWindow::MainWindow(QWidget *parent)
 
   ui->stackedWidget->setCurrentIndex(1);
   ui->plainTextEdit->setReadOnly(true);
-  state = State::Unauthorized;
 
   connect(ui->loadButton, &QPushButton::clicked, this, &MainWindow::loadFile);
   connect(ui->addButton, &QPushButton::clicked, this,
