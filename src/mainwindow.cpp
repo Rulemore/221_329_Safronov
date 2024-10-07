@@ -127,7 +127,7 @@ bool MainWindow::isValidTransaction(const QString &value,
 }
 
 void MainWindow::saveToFile() {
-  QFile file("transactions.csv");
+  QFile file(DATA_FILE_PATH);
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
     QMessageBox::warning(this, "Ошибка", "Не удалось сохранить файл");
     return;
