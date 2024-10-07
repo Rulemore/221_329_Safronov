@@ -4,6 +4,7 @@
 #include <addtransactiondialog.h>
 #include <openssl/evp.h>
 #include <transaction.h>
+#include <openssl/aes.h>
 
 #include <QByteArray>
 #include <QClipboard>
@@ -17,8 +18,9 @@
 #include <QString>
 
 const QString DATA_FILE_PATH = "transactions.csv";
-const QByteArray AES_KEY = "12345678901234567890123456789012";  // 32 байта (AES-256)
-const QByteArray IV = "1234567890123456";  // 16 байт для CBC
+const QByteArray KEY =
+    "94b362469d7e670e52221841c895b7ac130940e50fa8de825c6a8ab0654e134";  // 32 байта (AES-256)
+const QByteArray IV_CBC = "1234567812345678";
 
 // Объявление пространства имен для пользовательского интерфейса
 namespace Ui {
@@ -49,6 +51,10 @@ class MainWindow : public QMainWindow {
 
   // Метод для отображения списка транзакций
   void displayTransactions();
+
+  QByteArray encryptData(const QByteArray &data);
+
+  QByteArray decryptData(const QByteArray &data);
 
   // Указатель на пользовательский интерфейс
   Ui::MainWindow *ui;

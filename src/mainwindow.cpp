@@ -1,12 +1,62 @@
 #include "mainwindow.h"
 
+#include <QByteArray>
+#include <QCryptographicHash>
+#include <QDataStream>
+#include <QDebug>
+#include <QFile>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QString>
+#include <QTextStream>
 
 #include "ui_mainwindow.h"
+
+QByteArray MainWindow::encryptData(const QByteArray &data) {
+  QByteArray output;
+  output.resize(data.size() + AES_BLOCK_SIZE);
+
+  AES_KEY encryptKey;
+  AES_set_encrypt_key(reinterpret_cast<const unsigned char *>(KEY.constData()),
+                      256, &encryptKey);
+
+  // Шифрование
+  for (int i = 0; i < data.size(); i += AES_BLOCK_SIZE) {
+    AES_cbc_encrypt(
+        reinterpret_cast<const unsigned char *>(data.constData()) + i,
+        reinterpret_cast<unsigned char *>(output.data()) + i, AES_BLOCK_SIZE,
+        &encryptKey,
+        const_cast<unsigned char *>(
+            reinterpret_cast<const unsigned char *>(IV_CBC.constData())),
+        AES_ENCRYPT);
+  }
+
+  return output;
+}
+
+QByteArray MainWindow::decryptData(const QByteArray &data) {
+  QByteArray output;
+  output.resize(data.size());
+
+  AES_KEY decryptKey;
+  AES_set_decrypt_key(reinterpret_cast<const unsigned char *>(KEY.constData()),
+                      256, &decryptKey);
+
+  // Расшифрование
+  for (int i = 0; i < data.size(); i += AES_BLOCK_SIZE) {
+    AES_cbc_encrypt(
+        reinterpret_cast<const unsigned char *>(data.constData()) + i,
+        reinterpret_cast<unsigned char *>(output.data()) + i, AES_BLOCK_SIZE,
+        &decryptKey,
+        const_cast<unsigned char *>(
+            reinterpret_cast<const unsigned char *>(IV_CBC.constData())),
+        AES_DECRYPT);
+  }
+
+  return output;
+}
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -42,7 +92,11 @@ void MainWindow::loadFile() {
     return;
   }
 
-  QTextStream in(&file);
+  QByteArray encryptedData = file.readAll();
+  QByteArray decryptedData =
+      decryptData(encryptedData);  // Расшифрование данных
+
+  QTextStream in(&decryptedData);
   transactions.clear();
   while (!in.atEnd()) {
     QString line = in.readLine();
@@ -132,10 +186,14 @@ void MainWindow::saveToFile() {
     return;
   }
 
-  QTextStream out(&file);
+  QByteArray dataToSave;
+  QTextStream out(&dataToSave);
   for (const Transaction &e : transactions) {
     out << e.value << "," << e.walletId << "," << e.date << "," << e.hash
         << "\n";
   }
+
+  QByteArray encryptedData = encryptData(dataToSave);  // Шифрование данных
+  file.write(encryptedData);
   file.close();
 }
